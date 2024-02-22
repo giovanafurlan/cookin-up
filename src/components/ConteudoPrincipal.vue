@@ -1,21 +1,79 @@
 <script lang="ts">
+import MostrarReceitas from "./MostrarReceitas.vue";
+import Rodape from "./Rodape.vue";
 import SelecionarIngredientes from "./SelecionarIngredientes.vue";
 import SuaLista from "./SuaLista.vue";
 import Tag from "./Tag.vue";
 
+type Pagina = "SelecionarIngredientes" | "MostrarReceitas";
+
 export default {
   data() {
-    return { ingredientes: ["Alho", "Manteiga", "Orégano"] };
+    return {
+      ingredientes: [] as string[],
+      conteudo: "SelecionarIngredientes" as Pagina,
+    };
   },
-  components: { SelecionarIngredientes, Tag, SuaLista },
+  components: {
+    SelecionarIngredientes,
+    Tag,
+    SuaLista,
+    Rodape,
+    MostrarReceitas,
+  },
+  methods: {
+    adicionarIngrediente(ingrediente: string) {
+      this.ingredientes.push(ingrediente);
+    },
+    removerIngrediente(ingrediente: string) {
+      this.ingredientes = this.ingredientes.filter(
+        (iLista) => ingrediente !== iLista
+      );
+    },
+    navegar(pagina: Pagina) {
+      this.conteudo = pagina;
+    },
+  },
 };
 </script>
+
+<!-- <script setup lang="ts">
+import { ref } from "vue";
+import SelecionarIngredientes from "./SelecionarIngredientes.vue";
+import SuaLista from "./SuaLista.vue";
+
+const ingredientes = ref<string[]>([]);
+
+function adicionarIngrediente(ingrediente: string) {
+  ingredientes.value.push(ingrediente);
+}
+function removerIngrediente(ingrediente: string) {
+  ingredientes.value = ingredientes.value.filter(
+    (iLista) => ingrediente !== iLista
+  );
+}
+</script> -->
 
 <template>
   <main class="conteudo-principal">
     <SuaLista :ingredientes="ingredientes" />
-    <SelecionarIngredientes />
+
+    <KeepAlive include="SelecionarIngredientes">
+      <SelecionarIngredientes
+        v-if="conteudo === 'SelecionarIngredientes'"
+        @adicionar-ingrediente="adicionarIngrediente"
+        @remover-ingrediente="removerIngrediente"
+        @buscar-receitas="navegar('MostrarReceitas')"
+      />
+
+      <MostrarReceitas
+        v-else-if="conteudo === 'MostrarReceitas'"
+        :ingredientes="ingredientes"
+        @editar-receitas="navegar('SelecionarIngredientes')"
+      />
+    </KeepAlive>
   </main>
+  <Rodape />
 </template>
 
 <style scoped>
